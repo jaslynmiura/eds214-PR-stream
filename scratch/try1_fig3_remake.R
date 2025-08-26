@@ -75,7 +75,7 @@ ggplot(data = PRM_mean,
        aes(x = year, y = mean)) +
   geom_smooth()
   
-
+# need to change the binning calculations
 
 for (i in join1yearfor (i in join1_clean$week_of_yr) {
   if(join1_clean$week_of_yr[i] == ) {
