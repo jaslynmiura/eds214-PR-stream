@@ -17,3 +17,5 @@ PRM_clean$calc_rolling_ca <- sapply(
   conc = PRM_clean$ca,
   win_size_wks = 9
 )
+
+PRM_clean
