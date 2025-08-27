@@ -136,7 +136,6 @@ ggplot(data = PRM_mean,
        aes(x = date, y = mean)) +
   geom_smooth()
 
-
 ggplot(data = PRM_bins,
        aes(x = date, y = ca)) +
   geom_line()
