@@ -1,0 +1,49 @@
+# load in libraries ------------------------------------------------------------
+library(tidyverse)
+library(here)
+library(lubridate)
+library(janitor)
+
+# read in the files ------------------------------------------------------------
+# reading in each file and cleaning the variable names so it's easier handle
+PRM <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) %>% 
+  clean_names()
+BQ1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) %>% 
+  clean_names()
+BQ2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) %>% 
+  clean_names()
+BQ3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) %>% 
+  clean_names()
+
+# cleaning data ----------------------------------------------------------------
+# selecting the columns of data that we are interested in
+# also want to try to pivot the data frame so that all the concentrations are in one column but nutrient is defined by row
+PRM_clean_long <- PRM %>% 
+  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
+               names_to = "nutrient",
+               values_to = "concentration") %>% 
+  select(sample_id, sample_date, nutrient, concentration)
+
+BQ1_clean_long <- BQ1 %>% 
+  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
+               names_to = "nutrient",
+               values_to = "concentration") %>% 
+  select(sample_id, sample_date, nutrient, concentration)
+
+BQ2_clean_long <- BQ2 %>% 
+  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
+               names_to = "nutrient",
+               values_to = "concentration") %>% 
+  select(sample_id, sample_date, nutrient, concentration)
+
+BQ3_clean_long <- BQ3 %>% 
+  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
+               names_to = "nutrient",
+               values_to = "concentration") %>% 
+  select(sample_id, sample_date, nutrient, concentration)
+
+# joinging the data from the different stream sites into one data set
+stream_data <- PRM_clean_long %>% 
+  full_join(BQ1_clean_long) %>% 
+  full_join(BQ2_clean_long) %>% 
+  full_join(BQ3_clean_long)
