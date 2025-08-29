@@ -128,22 +128,27 @@ amm_nitrate_moving_avg <- stream_moving_avg %>%
   filter(year >= 1988,
          year <= 1998 )
 
+hugo <- as.Date("1989-09-20")
+
 # plotting potassium
 potassium_plot <- ggplot(data = potassium_moving_avg,
-       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+                         aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
   geom_line() +
-  # geom_vline(aes(xintercept = c(1998, 0)), linewidth = 1.5,
-  #            color = "black", linetype = "dashed") +
+  geom_vline(xintercept = hugo, color = "dodgerblue", linewidth = 0.8) +
   theme_minimal() + 
-  labs(x = NULL,
+  labs(title = "Stream Concentrations Before and After Hurricane Hugo",
+       x = NULL,
        y = "K mg l^-1") + 
-  theme(legend.position = c(0.9, 0.9)) 
+  theme(legend.title = element_blank()) +
+  theme(legend.position = "top" )
+  theme(plot.title.position = "plot")
 potassium_plot
 
 # plotting nitrate
 nitrate_plot <- ggplot(data = nitrate_moving_avg,
        aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
   geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
   theme_minimal() + 
   labs(x = NULL,
        y = "NO3-N mg l^-1") +
@@ -154,6 +159,7 @@ nitrate_plot
 magnesium_plot <- ggplot(data = magnesium_moving_avg,
        aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
   geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
   theme_minimal() +
   labs(x = NULL,
        y = "Mg l^-1") + 
@@ -163,6 +169,7 @@ magnesium_plot <- ggplot(data = magnesium_moving_avg,
 calcium_plot <- ggplot(data = calcium_moving_avg,
        aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
   geom_line() + 
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
   theme_minimal() +
   labs(x = NULL,
        y = "Ca l^-1") + 
@@ -172,9 +179,12 @@ calcium_plot <- ggplot(data = calcium_moving_avg,
 amm_nitrate_plot <- ggplot(data = amm_nitrate_moving_avg,
        aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
   geom_line() + 
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
   theme_minimal() +
   labs(x = "Years",
-       y = "NH4-N mg l^-1") + 
+       y = "NH4-N mg l^-1")  +
   theme(legend.position = "none")
 
-(potassium_plot / nitrate_plot / magnesium_plot / calcium_plot / amm_nitrate_plot)
+figure_3 <- (potassium_plot / nitrate_plot / magnesium_plot / calcium_plot / amm_nitrate_plot)
+
+ggsave(here("figs", "figure_3.png"), height = 8, width = 6)

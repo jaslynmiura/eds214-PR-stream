@@ -2,11 +2,152 @@
 title: "PR Streams Figs"
 author: "Jaslyn Miura"
 format: html
+warning: false
+editor_options: 
+  chunk_output_type: console
 ---
 
+Loading in useful packages
 ```{r}
 
+library(tidyverse)
+library(here)
+library(lubridate)
+library(janitor)
+library(patchwork)
 
+```
+
+Loading in cleaned data and functions
+```{r}
+
+# using source to call in our cleaned data and functions that were created in a separate R script
+source(here("scratch", "data_cleaning_and_tidying.R"))
+source(here("moving_avg_func.R"))
+
+```
+
+Running our analysis
+```{r}
+
+# using the moving_average function to calculate the moving average of concentrations
+stream_moving_avg <- stream_data %>% 
+  group_by(sample_id, nutrient) %>% 
+  mutate(sample_id = as.factor(sample_id),
+         nutrient = as.factor(nutrient)) %>% 
+  mutate(moving_avg = sapply(
+    sample_date,
+    moving_average,
+    dates = as.Date(sample_date),
+    conc = concentration,
+    win_size_wks = 9
+  ))
+
+```
+
+Prepping data to graph
+```{r}
+
+# creating a year column to so we can filter our data to our time frame of interest (1989-1998)
+stream_moving_avg <- stream_moving_avg %>% 
+  mutate(year = year(sample_date))
+
+# creating subsets of each nutrient concentrations to create seperate graphs
+potassium_moving_avg <- stream_moving_avg %>% 
+  filter(nutrient == "k") %>% 
+  filter(year >= 1988,
+         year <= 1998 )
+nitrate_moving_avg <- stream_moving_avg %>% 
+  filter(nutrient == "no3_n") %>% 
+  filter(year >= 1988,
+         year <= 1998 )
+magnesium_moving_avg <- stream_moving_avg %>% 
+  filter(nutrient == "mg") %>% 
+  filter(year >= 1988,
+         year <= 1998 )
+calcium_moving_avg <- stream_moving_avg %>% 
+  filter(nutrient == "ca") %>% 
+  filter(year >= 1988,
+         year <= 1998 )
+amm_nitrate_moving_avg <- stream_moving_avg %>% 
+  filter(nutrient == "nh4_n") %>% 
+  filter(year >= 1988,
+         year <= 1998 )
+
+# defining the date of Hurricane Hugo, so it can be highlighted on our graph
+hugo <- as.Date("1989-09-20")
+
+```
+
+Creating each graph
+```{r}
+
+# plotting potassium concentrations
+potassium_plot <- ggplot(data = potassium_moving_avg,
+                         aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue", linewidth = 0.8) +
+  theme_minimal() + 
+  labs(title = "Stream Concentrations Before and After Hurricane Hugo",
+       x = NULL,
+       y = "K mg l^-1") + 
+  theme(legend.title = element_blank()) +
+  theme(legend.position = "top" ) +
+  theme(plot.title.position = "plot")
+
+# plotting nitrate concentrations
+nitrate_plot <- ggplot(data = nitrate_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() + 
+  labs(x = NULL,
+       y = "NO3-N mg l^-1") +
+  theme(legend.position = "none")
+nitrate_plot
+
+# plotting magnesium concentrations
+magnesium_plot <- ggplot(data = magnesium_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() +
+  labs(x = NULL,
+       y = "Mg l^-1") + 
+  theme(legend.position = "none")
+
+# plotting calcium concentrations
+calcium_plot <- ggplot(data = calcium_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() + 
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() +
+  labs(x = NULL,
+       y = "Ca l^-1") + 
+  theme(legend.position = "none")
+
+# plotting ammonium nitrate concentrations
+amm_nitrate_plot <- ggplot(data = amm_nitrate_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() + 
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Years",
+       y = "NH4-N mg l^-1")  +
+  theme(legend.position = "none")
+
+```
+
+Combining the graphs and recreating the final figure
+```{r}
+
+# using patchwork to combine all our nutrient graphs into one final figure
+figure_3 <- (potassium_plot / nitrate_plot / magnesium_plot / calcium_plot / amm_nitrate_plot) + 
+  plot_layout(axes = "collect") +
+figure_3
+
+# saving our final figure into our figs folder
+ggsave(here("figs", "figure_3.png"), height = 8, width = 6)
 
 ```
 
