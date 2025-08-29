@@ -12,7 +12,9 @@ The eds214-PR-stream directory contains:
 
 **data**: raw and derived data
 
-**figures**: final plot
+**outputs**: intermediate data sets that have been cleaned and/or mutated and then saved as rds files to be called into paper.qmd
+
+**figs**: final plot
 
 **paper**: final qmd document that renders to a GitHub Page
 
@@ -20,7 +22,15 @@ The eds214-PR-stream directory contains:
 
 **images**: images used in README
 
-File name syntax:
+### R Files: Operations that have been done on the data to complete the analysis and get to the visualization process. R scripts should be run in numerical order before rendering the quarto document (paper.qmd)
+
+**0_initalization.R** : first step, install packages required for analysis
+
+**01_data_cleaning.R** : cleaning the raw data
+
+**02_moving_avg_cal**: using the moving_average function to calculate the moving average on our entire cleaned dataset
+
+**03_individ_nutri_subsets.R** : creating subsets based on nutrient for plotting purposes
 
 The following work flow was used to recreate the figure:
 

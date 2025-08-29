@@ -3,6 +3,8 @@ title: "Puerto Rico Stream Analysis"
 author: "Jaslyn Miura"
 format: html
 warning: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Jaslyn Miura
@@ -10,6 +12,7 @@ warning: false
 # jaslyntmiura\@ucsb.edu
 
 ```{r}
+#| echo: false
 # load in libraries ------------------------------------------------------------
 library(tidyverse)
 library(here)
@@ -32,41 +35,40 @@ For this analysis, we focused on four sites Puente Roto Mameyes (MPR), Quebrada 
 
 ```{r}
 # using source to call in our cleaned data and functions that were created in a separate R script
-source(here("data_cleaning_and_tidying.R"))
+stream_data <- readRDS(here("outputs", "stream_data.rds"))
+head(stream_data)
 
 ```
 
 ## Methods
 
-To smooth out the data and identify trends in the data a nine week moving average for each nutrient concentration was calculated.
+To smooth out the data and identify trends in the data, a nine week moving average for each nutrient concentration was calculated between 1989-1999.
+
+## Results
+
 
 ```{r}
 
-source(here("01_moving_avg_calc"))
+stream_moving_avg <- readRDS(here("outputs", "stream_moving_avg.rds"))
+head(stream_moving_avg, n = 10)
 
-# using the moving_average function to calculate the moving average of concentrations
-stream_moving_avg <- stream_data %>% 
-  group_by(sample_id, nutrient) %>% 
-  mutate(sample_id = as.factor(sample_id),
-         nutrient = as.factor(nutrient)) %>% 
-  mutate(moving_avg = sapply(
-    sample_date,
-    moving_average,
-    dates = as.Date(sample_date),
-    conc = concentration,
-    win_size_wks = 9
-  ))
-
-head(stream_moving_avg, n = 15)
 ```
-
-## Results
 
 After determining the moving average, plots for each nutrient was created. Hurricane Hugo was also defined as the disturbance in this analysis as 1989-09-20 (a midpoint date of the event).
 
 Creating each nutrient concentration graph.
 
 ```{r}
+
+# defining the date of Hurricane Hugo, so it can be highlighted on our graph
+hugo <- as.Date("1989-09-20")
+
+# calling in the individual nutrient subset data sets to plot individual nutrients first
+potassium_moving_avg <- readRDS(here("outputs", "potassium_moving_avg.rds"))
+nitrate_moving_avg <- readRDS(here("outputs", "nitrate_moving_avg.rds"))
+magnesium_moving_avg <- readRDS(here("outputs", "magnesium_moving_avg.rds"))
+calcium_moving_avg <- readRDS(here("outputs", "potassium_moving_avg.rds"))
+amm_nitrate_moving_avg <- readRDS(here("outputs", "amm_nitrate_moving_avg.rds"))
 
 # plotting potassium concentrations
 potassium_plot <- ggplot(data = potassium_moving_avg,
@@ -80,7 +82,6 @@ potassium_plot <- ggplot(data = potassium_moving_avg,
   theme(legend.title = element_blank()) +
   theme(legend.position = "top" ) +
   theme(plot.title.position = "plot")
-potassium_plot
 
 # plotting nitrate concentrations
 nitrate_plot <- ggplot(data = nitrate_moving_avg,
@@ -91,7 +92,6 @@ nitrate_plot <- ggplot(data = nitrate_moving_avg,
   labs(x = NULL,
        y = "NO3-N mg l^-1") +
   theme(legend.position = "none")
-nitrate_plot
 
 # plotting magnesium concentrations
 magnesium_plot <- ggplot(data = magnesium_moving_avg,
@@ -102,7 +102,6 @@ magnesium_plot <- ggplot(data = magnesium_moving_avg,
   labs(x = NULL,
        y = "Mg l^-1") + 
   theme(legend.position = "none")
-magnesium_plot
 
 # plotting calcium concentrations
 calcium_plot <- ggplot(data = calcium_moving_avg,
@@ -113,7 +112,6 @@ calcium_plot <- ggplot(data = calcium_moving_avg,
   labs(x = NULL,
        y = "Ca l^-1") + 
   theme(legend.position = "none")
-calcium_plot
 
 # plotting ammonium nitrate concentrations
 amm_nitrate_plot <- ggplot(data = amm_nitrate_moving_avg,
@@ -124,7 +122,6 @@ amm_nitrate_plot <- ggplot(data = amm_nitrate_moving_avg,
   labs(x = "Years",
        y = "NH4-N mg l^-1")  +
   theme(legend.position = "none")
-amm_nitrate_plot
 
 ```
 
@@ -135,12 +132,13 @@ Combining individual concentration graphs to compare concentration levels.
 # using patchwork to combine all our nutrient graphs into one final figure
 figure_3 <- (potassium_plot / nitrate_plot / magnesium_plot / calcium_plot / amm_nitrate_plot) + 
   plot_layout(axes = "collect")
+
 figure_3
 
 ```
 
 ```{r}
-#|include: FALSE
+#| echo: false
 
 # saving our final figure into our figs folder
 ggsave(here("figs", "figure_3.png"), height = 8, width = 6)
