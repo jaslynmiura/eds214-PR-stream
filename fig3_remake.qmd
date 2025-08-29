@@ -7,6 +7,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+
+
 Loading in useful packages
 ```{r}
 
@@ -94,6 +96,7 @@ potassium_plot <- ggplot(data = potassium_moving_avg,
   theme(legend.title = element_blank()) +
   theme(legend.position = "top" ) +
   theme(plot.title.position = "plot")
+potassium_plot
 
 # plotting nitrate concentrations
 nitrate_plot <- ggplot(data = nitrate_moving_avg,
@@ -143,7 +146,7 @@ Combining the graphs and recreating the final figure
 
 # using patchwork to combine all our nutrient graphs into one final figure
 figure_3 <- (potassium_plot / nitrate_plot / magnesium_plot / calcium_plot / amm_nitrate_plot) + 
-  plot_layout(axes = "collect") +
+  plot_layout(axes = "collect")
 figure_3
 
 # saving our final figure into our figs folder

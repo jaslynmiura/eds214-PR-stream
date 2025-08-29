@@ -2,11 +2,12 @@
 title: "Puerto Rico Stream Analysis"
 author: "Jaslyn Miura"
 format: html
+warning: false
 ---
 
 # Jaslyn Miura
 
-# jaslyntmiura@ucsb.edu
+# jaslyntmiura\@ucsb.edu
 
 ```{r}
 # load in libraries ------------------------------------------------------------
@@ -14,69 +15,134 @@ library(tidyverse)
 library(here)
 library(lubridate)
 library(janitor)
+library(patchwork)
 ```
 
 ## Background
 
+Within this analysis we examine Puerto Rico's stream nutrient concentrations before and after a disturbance. Background information and data was obtained from the following sources:
+
+Schaefer DouglasA, McDowell WH, Scatena FN, Asbury CE. Effects of hurricane disturbance on stream water concentrations and fluxes in eight tropical forest watersheds of the Luquillo Experimental Forest, Puerto Rico. *Journal of Tropical Ecology*. 2000;16(2):189-207. doi:10.1017/S0266467400001358
+
+McDowell, W. and International Institute of Tropical Forestry(IITF), USDA Forest Service.. 2024. Chemistry of stream water from the Luquillo Mountains ver 4923064. Environmental Data Initiative. https://doi.org/10.6073/pasta/f31349bebdc304f758718f4798d25458 (Accessed 2025-08-29).
+
 ## Data
 
+For this analysis, we focused on four sites Puente Roto Mameyes (MPR), Quebrada one-Bisley (Q1), Quebrada two-Bisley (Q2), and Quebrada three-Bisley (Q3) within a ten year time period, 1988 -1998. We analyzed the concentration levels of potassium, nitrate nitrogen, magnesium, calcium, and ammonium nitrate.
+
 ```{r}
-# read in the files ------------------------------------------------------------
-# reading in each file and cleaning the variable names so it's easier handle
-PRM <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) %>% 
-  clean_names()
-BQ1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) %>% 
-  clean_names()
-BQ2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) %>% 
-  clean_names()
-BQ3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) %>% 
-  clean_names()
-
-# cleaning data ----------------------------------------------------------------
-# selecting the columns of data that we are interested in
-# also want to try to pivot the data frame so that all the concentrations are in one column but nutrient is defined by row
-PRM_clean_long <- PRM %>% 
-  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
-               names_to = "nutrient",
-               values_to = "concentration") %>% 
-  select(sample_id, sample_date, nutrient, concentration)
-
-BQ1_clean_long <- BQ1 %>% 
-  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
-               names_to = "nutrient",
-               values_to = "concentration") %>% 
-  select(sample_id, sample_date, nutrient, concentration)
-
-BQ2_clean_long <- BQ2 %>% 
-  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
-               names_to = "nutrient",
-               values_to = "concentration") %>% 
-  select(sample_id, sample_date, nutrient, concentration)
-
-BQ3_clean_long <- BQ3 %>% 
-  pivot_longer(c("k", "no3_n", "mg", "ca", "nh4_n"),
-               names_to = "nutrient",
-               values_to = "concentration") %>% 
-  select(sample_id, sample_date, nutrient, concentration)
-
-# joinging the data from the different stream sites into one data set
-stream_data <- PRM_clean_long %>% 
-  full_join(BQ1_clean_long) %>% 
-  full_join(BQ2_clean_long) %>% 
-  full_join(BQ3_clean_long)
+# using source to call in our cleaned data and functions that were created in a separate R script
+source(here("scratch", "data_cleaning_and_tidying.R"))
+source(here("moving_avg_func.R"))
 
 ```
-
 
 ## Methods
 
-```{r}
-# running the analysis on just the PRM data set --------------------------------
-# testing that our moving_avg function works on one stream data set
-source(here("moving_avg_func.R"))
+To smooth out the data and identify trends in the data a nine week moving average for each nutrient concentration was calculated.
 
+```{r}
+# using the moving_average function to calculate the moving average of concentrations
+stream_moving_avg <- stream_data %>% 
+  group_by(sample_id, nutrient) %>% 
+  mutate(sample_id = as.factor(sample_id),
+         nutrient = as.factor(nutrient)) %>% 
+  mutate(moving_avg = sapply(
+    sample_date,
+    moving_average,
+    dates = as.Date(sample_date),
+    conc = concentration,
+    win_size_wks = 9
+  ))
+
+head(stream_moving_avg, n = 15)
+```
+
+## Results
+
+After determining the moving average, plots for each nutrient was created. Hurricane Hugo was also defined as the disturbance in this analysis as 1989-09-20 (a midpoint date of the event).
+
+Creating each nutrient concentration graph.
+
+```{r}
+
+# plotting potassium concentrations
+potassium_plot <- ggplot(data = potassium_moving_avg,
+                         aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue", linewidth = 0.8) +
+  theme_minimal() + 
+  labs(title = "Stream Concentrations Before and After Hurricane Hugo",
+       x = NULL,
+       y = "K mg l^-1") + 
+  theme(legend.title = element_blank()) +
+  theme(legend.position = "top" ) +
+  theme(plot.title.position = "plot")
+potassium_plot
+
+# plotting nitrate concentrations
+nitrate_plot <- ggplot(data = nitrate_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() + 
+  labs(x = NULL,
+       y = "NO3-N mg l^-1") +
+  theme(legend.position = "none")
+nitrate_plot
+
+# plotting magnesium concentrations
+magnesium_plot <- ggplot(data = magnesium_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() +
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() +
+  labs(x = NULL,
+       y = "Mg l^-1") + 
+  theme(legend.position = "none")
+magnesium_plot
+
+# plotting calcium concentrations
+calcium_plot <- ggplot(data = calcium_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() + 
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() +
+  labs(x = NULL,
+       y = "Ca l^-1") + 
+  theme(legend.position = "none")
+calcium_plot
+
+# plotting ammonium nitrate concentrations
+amm_nitrate_plot <- ggplot(data = amm_nitrate_moving_avg,
+       aes(x = sample_date, y = moving_avg, linetype = sample_id)) +
+  geom_line() + 
+  geom_vline(xintercept = hugo, color = "dodgerblue") +
+  theme_minimal() +
+  labs(x = "Years",
+       y = "NH4-N mg l^-1")  +
+  theme(legend.position = "none")
+amm_nitrate_plot
 
 ```
 
+Combining individual concentration graphs to compare concentration levels.
 
-## Results
+```{r}
+
+# using patchwork to combine all our nutrient graphs into one final figure
+figure_3 <- (potassium_plot / nitrate_plot / magnesium_plot / calcium_plot / amm_nitrate_plot) + 
+  plot_layout(axes = "collect")
+figure_3
+
+```
+
+```{r}
+#|include: FALSE
+
+# saving our final figure into our figs folder
+ggsave(here("figs", "figure_3.png"), height = 8, width = 6)
+
+```
+
+After the occurrence of a disturbance in Puerto Rico, such as Hurricane Hugo, there appears to be an increase in fluctuations of nutrient concentrations for about two years.
