@@ -15,8 +15,8 @@ BQ2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) %>%
 BQ3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) %>% 
   clean_names()
 
-# read in the moving_average function ------------------------------------------
-source(here("moving_avg_func.R"))
+# # read in the moving_average function ------------------------------------------
+# source(here("moving_avg_func.R"))
 
 # cleaning data ----------------------------------------------------------------
 # selecting the columns of data that we are interested in
@@ -50,6 +50,8 @@ stream_data <- PRM_clean_long %>%
   full_join(BQ1_clean_long) %>% 
   full_join(BQ2_clean_long) %>% 
   full_join(BQ3_clean_long)
+
+saveRDS(stream_data, file = here("outputs", "stream_data.rds" ))
 
 # using the moving_average function to calculate the moving average of concentrations
 stream_moving_avg <- stream_data %>% 

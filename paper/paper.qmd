@@ -32,8 +32,7 @@ For this analysis, we focused on four sites Puente Roto Mameyes (MPR), Quebrada 
 
 ```{r}
 # using source to call in our cleaned data and functions that were created in a separate R script
-source(here("scratch", "data_cleaning_and_tidying.R"))
-source(here("moving_avg_func.R"))
+source(here("data_cleaning_and_tidying.R"))
 
 ```
 
@@ -42,6 +41,9 @@ source(here("moving_avg_func.R"))
 To smooth out the data and identify trends in the data a nine week moving average for each nutrient concentration was calculated.
 
 ```{r}
+
+source(here("01_moving_avg_calc"))
+
 # using the moving_average function to calculate the moving average of concentrations
 stream_moving_avg <- stream_data %>% 
   group_by(sample_id, nutrient) %>% 
