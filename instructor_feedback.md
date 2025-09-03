@@ -22,35 +22,41 @@ Peer feed back went well, where I received helpful feed back from Vedika on how 
 
 [M] The analysis runs without errors
 
-[NY] **The analysis produces the expected output**
+[M] **The analysis produces the expected output**
 
 -   Your output looks great! It should be one figure instead of multiples, though.
+-   Great revisions, nice use of patchwork.
 
-[NY] **Data import/cleaning is handled in its own script(s)**
+[M] **Data import/cleaning is handled in its own script(s)**
 
 -   Your data handling script is in scratch/. That's just for testing things out! Anything your analysis relies on should be moved out of there.
+-   The scripts are now clearly labeled in the right location - great work!
 
 ## Organize
 
 [M] Raw data is contained in its own folder
 
-[NY] Intermediate outputs are created and saved to a separate folder from raw data
+[M] Intermediate outputs are created and saved to a separate folder from raw data
 
 -   paper.qmd sources data_cleaning_and_tidying.R, but the latter script should be creating outputs that paper.qmd can read in.
+-   Looks great now.
 
 [NY] **At least one piece of functionality has been refactored into a function in its own file**
 
 -   Function definitions should go in the R/ directory.
+-   I see moving_avg_func.R in the root directory, which is good! But function definitions should go in the R/ directory, which you don't have.
 
 ## Document
 
-[NY] The repo has a README that explains where to find (1) data, (2) analysis script, (3) supporting code, and (4) outputs
+[M] The repo has a README that explains where to find (1) data, (2) analysis script, (3) supporting code, and (4) outputs
 
 -   Your README is very light and needs to be fleshed out.
+-   EXCELLENT work, your README looks great.
 
-[NY] **The README includes a flowchart and text explaining how the analysis works**
+[M] **The README includes a flowchart and text explaining how the analysis works**
 
 -   See above
+-   Looks great!
 
 [M] **The code is appropriately commented**
 
@@ -60,9 +66,10 @@ Peer feed back went well, where I received helpful feed back from Vedika on how 
 
 After cloning the repo on Workbench:
 
-[NY] Running the environment initialization script installs all required packages
+[M] Running the environment initialization script installs all required packages
 
 -   I don't see a script that installs the required packages
+-   0_initialization.R covers this
 
 [M] The analysis script runs without errors
 
